@@ -1,0 +1,85 @@
+{
+  "project_info": {
+    "project_number": "477531562757",
+    "firebase_url": "https://radio-vestea-buna-12565.firebaseio.com",
+    "project_id": "radio-vestea-buna-12565",
+    "storage_bucket": "radio-vestea-buna-12565.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477531562757:android:43c58495ae278fc1b50d6c",
+        "android_client_info": {
+          "package_name": "com.andreib.radio_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477531562757-48cljr0cpf050a1obde8jgdm9rm3nvvs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8nYsufSu1TieypaZ3oM0aNn22wvNWSJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "477531562757-48cljr0cpf050a1obde8jgdm9rm3nvvs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "477531562757-j8ul8uk3mgtqqk2bp15pjr5opbiqlr66.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "net.RadioVB",
+                "app_store_id": "1024189178"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477531562757:android:98e9628bd58c6080",
+        "android_client_info": {
+          "package_name": "ro.radiovesteabuna.playonline"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477531562757-48cljr0cpf050a1obde8jgdm9rm3nvvs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8nYsufSu1TieypaZ3oM0aNn22wvNWSJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "477531562757-48cljr0cpf050a1obde8jgdm9rm3nvvs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "477531562757-j8ul8uk3mgtqqk2bp15pjr5opbiqlr66.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "net.RadioVB",
+                "app_store_id": "1024189178"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
