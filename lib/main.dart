@@ -25,12 +25,12 @@ import 'package:intl/intl.dart';
 import 'dart:isolate';
 
 MediaControl playControl = MediaControl(
-  androidIcon: 'drawable/ic_play',
+  androidIcon: 'drawable/audio_service_play_arrow',
   label: 'Play',
   action: MediaAction.play,
 );
 MediaControl stopControl = MediaControl(
-  androidIcon: 'drawable/ic_stop',
+  androidIcon: 'drawable/audio_service_stop',
   label: 'Stop',
   action: MediaAction.pause,
 );
@@ -73,28 +73,29 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
 
     customEventSubscription = AudioService.playbackStateStream.listen((value) {
       var playing = value?.playing ?? false;
-      var processingState =
-          value?.processingState ?? AudioProcessingState.stopped;
-      print(processingState);
+      var processingState = value?.processingState ?? AudioProcessingState.none;
+      //print(processingState);
+      //print(playing);
 
-      if (playing ||
-          processingState == AudioProcessingState.buffering ||
-          processingState == AudioProcessingState.connecting)
+      if (!playing) {
+        if (processingState == AudioProcessingState.ready ||
+            processingState == AudioProcessingState.none)
+          setState(() {
+            isPlaying = false;
+          });
+      } else if (playing) {
         setState(() {
           isPlaying = true;
         });
-      else
-        setState(() {
-          isPlaying = false;
-        });
+      } else {}
     });
 
-    playStopSubscription = PlayStopStreamer().stream.listen((value) {
-      setState(() {
-        isPlaying = false;
-      });
-      AudioService.stop();
-    });
+//    playStopSubscription = PlayStopStreamer().stream.listen((value) async {
+//      setState(() {
+//        isPlaying = false;
+//      });
+//      await AudioService.stop();
+//    });
 
     currentSongsSubscription =
         CurrentSongsFetcher().stream.listen((songs) async {
@@ -112,6 +113,7 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
     disconnect();
     WidgetsBinding.instance.removeObserver(this);
     currentSongsSubscription.cancel();
+    customEventSubscription.cancel();
     //playStopSubscription.cancel();
     super.dispose();
   }
@@ -269,13 +271,11 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
                                             );
                                             await favoritesManager
                                                 .saveFavorite(entry);
-                                            Future.delayed(
-                                                const Duration(
-                                                    milliseconds: 500), () {
-                                              setState(() {
-                                                liked = !isLiked;
-                                              });
+
+                                            setState(() {
+                                              liked = !isLiked;
                                             });
+
                                             return !isLiked;
                                           } else {
                                             Scaffold.of(context).showSnackBar(
@@ -350,27 +350,6 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
                       ),
                     ),
                   ),
-//                  Expanded(
-//                    flex: 5,
-//                    child: Column(
-//                      mainAxisAlignment: MainAxisAlignment.end,
-//                      children: <Widget>[
-//                        Container(
-//                          padding: const EdgeInsets.fromLTRB(10, 0, 20, 0),
-//                          child: Align(
-//                            alignment: Alignment.centerLeft,
-//                            child: Text(
-//                              "Melodii anterioare:",
-//                              style: TextStyle(
-//                                color: Colors.black,
-//                                fontSize: 12,
-//                              ),
-//                            ),
-//                          ),
-//                        ),
-//                      ],
-//                    ),
-//                  ),
                   Expanded(
                     flex: 50,
                     child: Container(
@@ -391,10 +370,10 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
                             var songs = snapshot.data;
                             return ListView(
                               children: List.generate(5, (index) {
-                                var date =
-                                    new DateTime.fromMillisecondsSinceEpoch(
-                                        songs[index + 1].playedAt * 1000);
-                                var time = DateFormat.Hm().format(date);
+//                                var date =
+//                                    new DateTime.fromMillisecondsSinceEpoch(
+//                                        songs[index + 1].playedAt * 1000);
+//                                var time = DateFormat.Hm().format(date);
                                 return Container(
                                   margin: EdgeInsets.only(bottom: 8.0),
                                   decoration: BoxDecoration(
@@ -402,13 +381,13 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
                                     color: Colors.teal[50],
                                   ),
                                   child: ListTile(
-                                    trailing: Text(
-                                      '$time',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+//                                    trailing: Text(
+//                                      '$time',
+//                                      style: TextStyle(
+//                                          fontSize: 12,
+//                                          color: Colors.black,
+//                                          fontWeight: FontWeight.bold),
+//                                    ),
                                     title: Text(
                                       '${songs[index + 1].title}',
                                       style: TextStyle(
@@ -449,19 +428,14 @@ class AudioPlayerTask extends BackgroundAudioTask {
   bool _playing = false;
   bool _interrupted = false;
 
-  StreamSubscription<PlaybackState> playerStateSubscription;
   StreamSubscription<PlaybackEvent> eventSubscription;
   var currentSongsSubscription;
 
   Future<void> _broadcastState() async {
-    await AudioServiceBackground.setState(
-      controls: [
-        if (_audioPlayer.playing) stopControl else playControl,
-        closeControl,
-      ],
-      processingState: _getProcessingState(),
-      playing: _audioPlayer.playing
-    );
+    await AudioServiceBackground.setState(controls: [
+      if (_audioPlayer.playing) stopControl else playControl,
+      closeControl,
+    ], processingState: _getProcessingState(), playing: _playing);
   }
 
   /// Maps just_audio's processing state into into audio_service's playing
@@ -503,7 +477,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     });
     currentSongsSubscription = CurrentSongsFetcher().stream.listen((songs) {
       var mediaItem = MediaItem(
-        id: songs[0].playedAt.toString(),
+        id: songs[0].title ?? '',
         title: songs[0].title ?? '',
         artist: songs[0].artist ?? '',
         album: '',
@@ -525,12 +499,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onStop() async {
+    _playing = false;
     await _audioPlayer.pause();
     await _audioPlayer.dispose();
-    _playing = false;
-    playerStateSubscription.cancel();
     eventSubscription.cancel();
-    currentSongsSubscription.cancel();
 
     await _broadcastState();
     await super.onStop();
@@ -543,18 +515,13 @@ class AudioPlayerTask extends BackgroundAudioTask {
     } catch (e) {
       print(e);
     }
-    _playing = true;
     AudioServiceBackground.setState(
-      controls: [MediaControl.stop, closeControl],
+      controls: [stopControl, closeControl],
       processingState: AudioProcessingState.ready,
       playing: true,
     );
-
+    _playing = true;
     return _audioPlayer.play();
-  }
-
-  void _handlePlaybackCompleted() {
-    onStop();
   }
 
   Future<void> playPause() async {
@@ -567,8 +534,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onPause() {
     _playing = false;
-    //_audioPlayer.pause();
-    return _audioPlayer.stop();
+    return _audioPlayer.pause();
   }
 
   @override
@@ -576,7 +542,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onTaskRemoved() async {
-    onStop();
+    await onStop();
     super.onTaskRemoved();
   }
 
@@ -596,49 +562,19 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future<void> onAudioFocusGained(AudioInterruption interruption) async {
     switch (interruption) {
       case AudioInterruption.temporaryPause:
-      // Resume playback again. But only if we *were* originally playing at
-      // the time the phone call came through. If we were paused when the
-      // phone call came, we shouldn't suddenly start playing when they hang
-      // up.
+        // Resume playback again. But only if we *were* originally playing at
+        // the time the phone call came through. If we were paused when the
+        // phone call came, we shouldn't suddenly start playing when they hang
+        // up.
         if (!_audioPlayer.playing && _interrupted) onPlay();
         break;
       case AudioInterruption.temporaryDuck:
-      // Resume normal volume after a duck.
+        // Resume normal volume after a duck.
         _audioPlayer.setVolume(1.0);
         break;
       default:
         break;
     }
     _interrupted = false;
-  }
-
-  @override
-  Future<void> onAudioBecomingNoisy() async {
-    onPause();
-  }
-
-  Future<void> _setState({
-    AudioProcessingState processingState,
-  }) async {
-    await AudioServiceBackground.setState(
-      controls: getControls(),
-      processingState:
-          processingState ?? AudioServiceBackground.state.processingState,
-      playing: _playing,
-    );
-  }
-
-  List<MediaControl> getControls() {
-    if (_playing) {
-      return [
-        stopControl,
-        closeControl,
-      ];
-    } else {
-      return [
-        playControl,
-        closeControl,
-      ];
-    }
   }
 }

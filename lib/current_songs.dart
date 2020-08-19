@@ -1,21 +1,24 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:html_unescape/html_unescape_small.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:just_audio/just_audio.dart';
-import 'package:audio_service/audio_service.dart';
 
 import 'package:radio_app/models/Song.dart';
 
 Future<List<Song>> fetchSongs() async {
   final response =
-      await http.get('http://198.50.156.36:8246/played.html?type=json');
+      await http.get('https://c28.radioboss.fm/w/recenttrackslist?u=175');
   if (response.statusCode == 200) {
-    var jsonResponse = jsonDecode(response.body) as List;
+    var unescape = new HtmlUnescape();
+    var r = unescape.convert(response.body);
+    var jsonResponse = jsonDecode(r) as List;
+    //print(jsonResponse);
     List<Song> songsList =
         jsonResponse.map((item) => Song.fromJson(item)).toList();
-    songsList.forEach((song) => print(song));
-    return songsList;
+    List<Song> last6 = songsList.sublist(0, 6);
+    //last6.forEach((song) => print(song));
+    return last6;
   } else {
     throw Exception('Failes to load Song.');
   }

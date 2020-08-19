@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MessagingWidget extends StatefulWidget {
   @override
@@ -8,6 +9,14 @@ class MessagingWidget extends StatefulWidget {
 
 class _MessagingWidgetState extends State<MessagingWidget> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  Future<void> _handleNotificationClick(Map<String, dynamic> message) async {
+    var data = message['data'] ?? message;
+    //print(data);
+    String notificationUrl = data['notificationUrl'] ?? null;
+    if(notificationUrl != null)
+      launch(notificationUrl);
+  }
 
   @override
   void initState() {
@@ -25,7 +34,15 @@ class _MessagingWidgetState extends State<MessagingWidget> {
                 FlatButton(
                   child: Text('Ok'),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    var data = message['data'] ?? message;
+                    //print(data);
+                    String notificationUrl = data['notificationUrl'] ?? null;
+                    if(notificationUrl != null) {
+                      Navigator.of(context).pop();
+                      launch(notificationUrl);
+                    }
+                    else
+                      Navigator.of(context).pop();
                   },
                 )
               ],
@@ -33,8 +50,8 @@ class _MessagingWidgetState extends State<MessagingWidget> {
           );
           print('onMessage: $message');
         },
-        onLaunch: (Map<String, dynamic> message) async {},
-        onResume: (Map<String, dynamic> message) async {});
+        onLaunch: _handleNotificationClick,
+        onResume: _handleNotificationClick);
     _firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
   }

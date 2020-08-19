@@ -147,7 +147,7 @@ class _FavoritesState extends State<Favorites> {
                                 Text("Melodia a fost eliminată din listă."),
                             duration: Duration(seconds: 3),
                             action: SnackBarAction(
-                              label: 'Undo',
+                              label: 'UNDO',
                               onPressed: () {
                                 favoritesManager.replaceFavorites(undoItems);
                                 getFavoritesList();
