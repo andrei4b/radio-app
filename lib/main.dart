@@ -90,13 +90,6 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
       } else {}
     });
 
-//    playStopSubscription = PlayStopStreamer().stream.listen((value) async {
-//      setState(() {
-//        isPlaying = false;
-//      });
-//      await AudioService.stop();
-//    });
-
     currentSongsSubscription =
         CurrentSongsFetcher().stream.listen((songs) async {
       liked = await favoritesManager
@@ -114,7 +107,6 @@ class _MyRadioPlayer extends State<RadioPlayer> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     currentSongsSubscription.cancel();
     customEventSubscription.cancel();
-    //playStopSubscription.cancel();
     super.dispose();
   }
 
@@ -423,6 +415,8 @@ void _audioPlayerTaskEntrypoint() async {
 class AudioPlayerTask extends BackgroundAudioTask {
   static const String URL = "http://198.50.156.36:8246/stream";
   static const String NEW_URL = "https://c28.radioboss.fm:18175/stream";
+  static const String NEW_URL2 = "http://c28.radioboss.fm:8175/stream";
+
   AudioPlayer _audioPlayer = AudioPlayer();
   AudioProcessingState _audioProcessingState;
   bool _playing = false;
@@ -511,7 +505,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onPlay() async {
     try {
-      await _audioPlayer.setUrl(NEW_URL);
+      await _audioPlayer.setUrl(NEW_URL2);
     } catch (e) {
       print(e);
     }

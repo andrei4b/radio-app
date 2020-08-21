@@ -179,7 +179,7 @@ class _ShowDetailsState extends State<ShowDetails> {
                         isPlaying = true;
                       });
                       await player.setUrl(widget.show['showPromoUrl']);
-                      PlayStopStreamer().stop();
+//                      PlayStopStreamer().stop();
                       player.play();
                     },
                   ) :

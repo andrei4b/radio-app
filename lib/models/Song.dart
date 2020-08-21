@@ -8,7 +8,6 @@ class Song {
 
   factory Song.fromJson(dynamic json) {
     String artist, title;
-    print(json);
     String artistAndTitle = json['title'] as String;
     if (artistAndTitle.contains(' - ')) {
       List<String> artistAndTitleList = artistAndTitle.split(' - ');

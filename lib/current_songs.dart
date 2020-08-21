@@ -17,7 +17,7 @@ Future<List<Song>> fetchSongs() async {
     List<Song> songsList =
         jsonResponse.map((item) => Song.fromJson(item)).toList();
     List<Song> last6 = songsList.sublist(0, 6);
-    //last6.forEach((song) => print(song));
+    last6.forEach((song) => print(song));
     return last6;
   } else {
     throw Exception('Failes to load Song.');
