@@ -65,7 +65,6 @@ class _ContactState extends State<Contact> {
                               onTap: () {
                                 launch('tel:$livePhone');
                               }),
-                          Text(' (LIVE)')
                         ],
                       ),
                     ),
